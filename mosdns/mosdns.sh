@@ -14,6 +14,40 @@ RULE_DIR="/etc/mosdns/rule"
 TMP_DIR="/tmp/mosdns_update"
 NEED_RELOAD=0
 
+# 可用规则文件列表
+ALL_RULES="blocklist.txt cloudflare-cidr.txt ddnslist.txt greylist.txt hosts.txt local-ptr.txt redirect.txt streaming.txt whitelist.txt"
+
+# 默认仅更新 streaming.txt
+UPDATE_RULES="streaming.txt"
+
+# 参数解析
+usage() {
+    echo "用法: $0 [-a] [-r 规则文件]"
+    echo "  -a           更新所有规则文件"
+    echo "  -r 规则文件  指定要更新的规则文件（可多次使用）"
+    echo "  -h           显示帮助"
+    echo ""
+    echo "可用规则文件: $ALL_RULES"
+    exit 0
+}
+
+while getopts "ar:h" opt; do
+    case $opt in
+        a)
+            UPDATE_RULES="$ALL_RULES"
+            ;;
+        r)
+            UPDATE_RULES="$UPDATE_RULES $OPTARG"
+            ;;
+        h)
+            usage
+            ;;
+        *)
+            usage
+            ;;
+    esac
+done
+
 # 日志函数
 log() {
     logger -t "MosDNS_Cloud" "$1"
@@ -21,7 +55,12 @@ log() {
 }
 
 # 1. 环境准备
-mkdir -p "$RULE_DIR"
+# 检查 luci-app-mosdns 是否安装
+if ! opkg list-installed | grep -q "luci-app-mosdns"; then
+    log "错误: luci-app-mosdns 未安装，请先在 OpenWrt 中安装插件"
+    exit 1
+fi
+
 mkdir -p "$TMP_DIR"
 
 # 2. 网络连通性预检 (防止断网导致下载空文件)
@@ -97,6 +136,7 @@ safe_update() {
 # --- 执行阶段 ---
 
 log "开始检查同步任务..."
+log "本次更新规则: $UPDATE_RULES"
 
 # A. 更新 UCI 配置文件 (通过检测 'config mosdns' 确保不是下载到了 404 页面)
 safe_update "$BASE_URL/uci/mosdns" "$UCI_CONF" "config mosdns 'config'" || {
@@ -106,8 +146,7 @@ safe_update "$BASE_URL/uci/mosdns" "$UCI_CONF" "config mosdns 'config'" || {
 }
 
 # B. 批量更新规则文件 (规则文件通常是文本，不指定关键词强制检查)
-RULES="blocklist.txt cloudflare-cidr.txt ddnslist.txt greylist.txt hosts.txt local-ptr.txt redirect.txt streaming.txt whitelist.txt"
-for rule in $RULES; do
+for rule in $UPDATE_RULES; do
     safe_update "$BASE_URL/rule/$rule" "$RULE_DIR/$rule"
 done
 
