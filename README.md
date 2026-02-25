@@ -11,6 +11,10 @@
 在 OpenWrt 的"系统 -> 计划任务"中配置：
 
 ```
+# 每小时执行
+0 * * * * curl -sL https://raw.githubusercontent.com/onchina/sh/main/mosdns/mosdns.sh | sh
+
+# 每天凌晨 4 点执行
 0 4 * * * curl -sL https://raw.githubusercontent.com/onchina/sh/main/mosdns/mosdns.sh | sh
 ```
 
