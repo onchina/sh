@@ -1,0 +1,23 @@
+# MosDNS Rules
+
+#更新
+domain:raw.githubusercontent.com
+domain:jsdelivr.net
+
+# 订阅
+domain:api.dler.io
+domain:api.wcc.best
+domain:api.asailor.org
+domain:psub.888005.xyz
+
+
+# 酷糯米
+# jfjydhc1.ovalyraa.com
+# jq26txdo.ovalyraa.com
+domain:ovalyraa.com
+
+# 奶油
+# 01bebc.gdwswe.xyz
+# 20f84g.umygza.xyz
+domain:gdwswe.xyz
+domain:umygza.xyz
