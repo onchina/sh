@@ -2,7 +2,7 @@
 
 ## 前置要求
 
-请确保已在 OpenWrt 中安装 **luci-app-mosdns** 插件，否则脚本将无法运行。
+请确保已在 OpenWrt 中安装 **luci-app-mosdns** 插件，否则脚本将自动退出。
 
 ## 使用方法
 
