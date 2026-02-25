@@ -8,7 +8,7 @@
 export PATH="/usr/sbin:/usr/bin:/sbin:/bin"
 
 # 配置区
-BASE_URL="https://sh.onchina.vip/mosdns"
+BASE_URL="https://raw.githubusercontent.com/onchina/sh/main/mosdns"
 UCI_CONF="/etc/config/mosdns"
 RULE_DIR="/etc/mosdns/rule"
 TMP_DIR="/tmp/mosdns_update"
