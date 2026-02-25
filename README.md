@@ -6,7 +6,7 @@
 
 ```
 # 每天凌晨 4 点下载云端脚本并执行
-0 4 * * * curl -sL https://sh.onchina.vip/mosdns.sh | sh
+0 4 * * * curl -sL https://raw.githubusercontent.com/onchina/sh/main/mosdns/mosdns.sh | sh
 ```
 
 ### 参数说明
