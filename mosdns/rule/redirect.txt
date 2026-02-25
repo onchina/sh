@@ -1,6 +1,1 @@
 # MosDNS Rules
-
-statics.moonshot.cn yibuapi.com
-api.moonshot.cn yibuapi.com
-api22-normal-alisg.mchost.guru yibuapi.com
-api22-normal-useast1a.mchost.guru  yibuapi.com

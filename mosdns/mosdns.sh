@@ -25,46 +25,67 @@ mkdir -p "$RULE_DIR"
 mkdir -p "$TMP_DIR"
 
 # 2. 网络连通性预检 (防止断网导致下载空文件)
-if ! ping -c 1 223.5.5.5 > /dev/null 2>&1; then
-    log "错误: 网络不可达，停止更新。"
+if ! curl -sL --connect-timeout 10 -o /dev/null "$BASE_URL"; then
+    log "错误: 网络不可达，无法连接 $BASE_URL"
     exit 1
 fi
 
-# 3. 函数：安全下载并校验
-# 参数: 远程URL, 本地目标路径, 标识关键词(用于格式校验)
+# 3. 函数：安全下载并校验 (支持重试)
+# 参数: 远程URL, 本地目标路径, 标识关键词(用于格式校验), 最大重试次数
 safe_update() {
     local url="$1"
     local target="$2"
     local keyword="$3"
+    local max_retry="${4:-3}"
     local filename=$(basename "$target")
     local tmp_file="$TMP_DIR/$filename"
+    local attempt=0
 
-    # 下载
-    if ! curl -sL --connect-timeout 10 "$url" -o "$tmp_file"; then
-        log "下载失败: $filename"
-        return 1
-    fi
+    while [ $attempt -lt $max_retry ]; do
+        attempt=$((attempt + 1))
 
-    # 基础校验：文件必须存在且大小大于0
-    if [ ! -s "$tmp_file" ]; then
-        log "校验失败: $filename 文件为空"
-        return 1
-    fi
-
-    # 逻辑校验：如果提供了关键词，检查文件中是否存在
-    if [ -n "$keyword" ]; then
-        if ! grep -q "$keyword" "$tmp_file"; then
-            log "格式校验失败: $filename 未包含关键特征 '$keyword'"
-            return 1
+        # 下载
+        if curl -sL --connect-timeout 10 "$url" -o "$tmp_file"; then
+            # 基础校验：文件必须存在且大小大于0
+            if [ -s "$tmp_file" ]; then
+                # 逻辑校验：如果提供了关键词，检查文件中是否存在
+                if [ -z "$keyword" ] || grep -q "$keyword" "$tmp_file"; then
+                    break
+                else
+                    log "格式校验失败: $filename 未包含关键特征 '$keyword'"
+                fi
+            else
+                log "校验失败: $filename 文件为空"
+            fi
+        else
+            log "下载失败: $filename (尝试 $attempt/$max_retry)"
         fi
+
+        if [ $attempt -lt $max_retry ]; then
+            sleep 2
+        fi
+    done
+
+    if [ $attempt -eq $max_retry ]; then
+        log "错误: $filename 多次下载失败，放弃更新"
+        return 1
     fi
 
     # MD5 对比：无变化则不处理
-    local new_md5=$(md5sum "$tmp_file" | awk '{print $1}')
-    local old_md5="none"
-    [ -f "$target" ] && old_md5=$(md5sum "$target" | awk '{print $1}')
+    local new_md5=$(md5sum "$tmp_file" 2>/dev/null | awk '{print $1}')
+    if [ -z "$new_md5" ]; then
+        new_md5=$(cat "$tmp_file" | wc -c)
+    fi
 
-    if [ "$new_md5" != "$old_md5" ]; then
+    local old_md5=""
+    if [ -f "$target" ]; then
+        old_md5=$(md5sum "$target" 2>/dev/null | awk '{print $1}')
+        if [ -z "$old_md5" ]; then
+            old_md5=$(cat "$target" | wc -c)
+        fi
+    fi
+
+    if [ "$new_md5" != "$old_md5" ] && [ -n "$new_md5" ]; then
         cp "$tmp_file" "$target"
         chmod 644 "$target"
         log "更新成功: $filename"
@@ -78,7 +99,11 @@ safe_update() {
 log "开始检查同步任务..."
 
 # A. 更新 UCI 配置文件 (通过检测 'config mosdns' 确保不是下载到了 404 页面)
-safe_update "$BASE_URL/uci/mosdns" "$UCI_CONF" "config mosdns 'config'"
+safe_update "$BASE_URL/uci/mosdns" "$UCI_CONF" "config mosdns 'config'" || {
+    log "错误: UCI 配置更新失败，停止后续操作"
+    rm -rf "$TMP_DIR"
+    exit 1
+}
 
 # B. 批量更新规则文件 (规则文件通常是文本，不指定关键词强制检查)
 RULES="blocklist.txt cloudflare-cidr.txt ddnslist.txt greylist.txt hosts.txt local-ptr.txt redirect.txt streaming.txt whitelist.txt"
