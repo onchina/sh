@@ -10,14 +10,17 @@ domain:api.wcc.best
 domain:api.asailor.org
 domain:psub.888005.xyz
 
-
 # 酷糯米
 # jfjydhc1.ovalyraa.com
 # jq26txdo.ovalyraa.com
+# xm7kgjxb.everstatic.net
 domain:ovalyraa.com
+domain:everstatic.net
 
 # 奶油
 # 01bebc.gdwswe.xyz
 # 20f84g.umygza.xyz
+# 01bebc.creamcached.com
 domain:gdwswe.xyz
 domain:umygza.xyz
+domain:creamcached.com
