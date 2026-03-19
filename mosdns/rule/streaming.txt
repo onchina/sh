@@ -28,3 +28,9 @@ domain:creamcached.com
 
 # 肯
 domain:xrognet.com
+
+# tw
+domain:tachy.cc
+tachy.cc
+sub.tachy.cc
+tw.tachy.cc
