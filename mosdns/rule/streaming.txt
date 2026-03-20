@@ -9,6 +9,8 @@ domain:api.dler.io
 domain:api.wcc.best
 domain:api.asailor.org
 domain:psub.888005.xyz
+domain:psub.onchina.vip
+
 
 # 酷糯米
 # jfjydhc1.ovalyraa.com
@@ -24,7 +26,6 @@ domain:everstatic.net
 domain:gdwswe.xyz
 domain:umygza.xyz
 domain:creamcached.com
-
 
 # 肯
 domain:xrognet.com
