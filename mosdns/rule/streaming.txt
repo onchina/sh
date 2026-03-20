@@ -35,3 +35,9 @@ domain:tachy.cc
 tachy.cc
 sub.tachy.cc
 tw.tachy.cc
+
+# ix
+# 505330.xyz
+domain:505330.xyz
+
+
