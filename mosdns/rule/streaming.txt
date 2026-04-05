@@ -38,6 +38,7 @@ tw.tachy.cc
 
 # ix
 # 505330.xyz
-domain:505330.xyz
 
+domain:505330.xyz
+domain:ezov.de
 
